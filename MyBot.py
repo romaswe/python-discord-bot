@@ -8,7 +8,7 @@ import struct
 import time
 import giphy_client
 import codecs
-from pprint import pprint
+import urllib.request
 from giphy_client.rest import ApiException
 from random import randint
 
@@ -57,7 +57,7 @@ async def on_message(message):
             await client.send_message(message.channel, '<@' + message.author.id + '> you are banned')
     else:
         if message.content.startswith('!help'):
-            await client.send_message(message.channel, 'Try: !settimer, !links, !miun, !addcitat, !editcitat, !allcitat !gif or !rgif')
+            await client.send_message(message.channel, 'Try: !settimer, !links, !crypto, !miun, !addcitat, !editcitat, !allcitat !gif or !rgif')
 
         elif message.content.startswith('!rgif'):       
             try:
@@ -158,12 +158,13 @@ async def on_message(message):
                 timerMessage = args[1].split(' ', 1)
                 if (float(timerMessage[0]) >= 480):
                     TimerText = "Maxtid för timern är 8 timmar / 480 minuter"
-                else:                      
+                else:
+                    await client.send_message(message.channel, "Timer is set for " + timerMessage[0] + " Min")                      
                     await asyncio.sleep(float(timerMessage[0])*60)
                     if (len(timerMessage) < 2):                       
                         TimerText = '<@' + message.author.id + '> piip piip piip'
                     else:
-                        TimerText =  + timerMessage[1]
+                        TimerText = '<@' + message.author.id + '> ' + timerMessage[1]
             
             await client.send_message(message.channel, TimerText)
 
@@ -210,6 +211,23 @@ async def on_message(message):
                     
             await client.send_message(message.channel, BannedList)
         
-        
+        elif message.content.startswith('!crypto'):
+            if (len(args) < 2):
+                    cryptoText = "Ange en valuta"
+            else:
+                cryptoName = str(args[1])
+                url = "https://api.coinmarketcap.com/v1/ticker/"+ cryptoName +"/?convert=EUR"
+
+                try: urllib.request.urlopen(url)
+                except urllib.error.URLError as e:
+                    cryptoText = cryptoName + " is " + e.reason
+                else:
+                    with urllib.request.urlopen(url) as url:
+                        cryptoValue = json.loads(url.read().decode())
+
+                    cryptoText = cryptoName + ' är just nu värd ' +  cryptoValue[0]['price_eur'] + ' EUR och senaste förendringen under 24 timmar är ' + cryptoValue[0]['percent_change_24h'] + '%'
+
+                    
+            await client.send_message(message.channel, cryptoText)
 
 client.run(data["Dtoken"])
