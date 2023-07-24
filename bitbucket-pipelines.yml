@@ -1,0 +1,11 @@
+pipelines:
+  default:
+    - step:
+        name: Sync GitHub Mirror
+        image: alpine/git:latest
+        clone:
+          enabled: false
+        script:
+          - git clone --bare git@bitbucket.org:romaswe/python-discord-bot.git
+          - cd python-discord-bot.git
+          - git push --mirror git@github.com:romaswe/python-discord-bot.git
